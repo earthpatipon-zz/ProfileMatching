@@ -1,48 +1,42 @@
 import pandas as pd
 import numpy as np
 
-# variables
-authorDict = []
-tempList = []
-
 # import data
 data = pd.read_csv('dataset.csv')
-#print data.dtypes
+
+# Storage
+dic = {}        # ['author name'] : index of dicList
+dicList = []    # list of dictionary
 
 # extract information from data
-authorList = data['Authors with affiliations'].str.split(';')
-indexList = data['Index Keywords'].str.split(';')
+authorList = data['Authors with affiliations'].str.split(';')   # yield ['name., address'] , ['name., address'], .....
+keywordList = data['Index Keywords'].str.split(';')             # yield ['key1', 'key2', 'key3', ...., 'keyN']
+docList = data['Title']
 
-# print type(authorList)
-# print type(authorList[0])
-# print len(authorList[0])
-# print authorList[0]
-# print authorList[0][0]
-# print authorList[0][1]
-# print authorList[0][2]
-# print authorList[0][3]
-# print authorList[0][4]
-# print authorList[0][5]
+for i in range(len(data)):
+    keyword = keywordList[i]
+    document = docList[i]
 
-
-for i in range(len(authorList)-2500):
-    #tempList = [text.split() for text in authorList[i] if text]
-    #print tempList
     for j in range(len(authorList[i])):
-        tempList = authorList[i][j].split('.,')
-        # print type(tempList[0])
-        # print tempList[0]
-        # print tempList[1]
-        authorDict.append({'Author': tempList[0], 'Address': tempList[1] if len(tempList) > 1 else ''})
+        author = authorList[i][j].split('.,')   # yield ['name', 'address'] which is <0,1>
+        address = author[1] if len(author) > 1 else ''
 
-print authorDict[1]
-print authorDict[2]
-# for i in authorList:
-#     authorDict.append({'Author': i, 'Location': i[1]})
-#     print i
+        if author[0] not in dic:
+            dic[author[0]] = i
+            dicList.append({'Author': author[0], 'Address': address, 'Keyword': keyword, 'Document': document})
+        else:
+            add = dicList[i]['Address']
+            key = dicList[i]['Keyword']
+            doc = dicList[i]['Document']
+
+            dicList[i]['Address'] = add + address
+            dicList[i]['Keyword'] = key + keyword
+            dicList[i]['Document'] = doc + document
 
 
-
+# # check
+# for d in dicList:
+#     print d
 
 
 ##### misc. #####
