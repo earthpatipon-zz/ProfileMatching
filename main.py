@@ -19,7 +19,7 @@ for i in range(len(data)):
     document = docList[i]
 
     for j in range(len(authorList[i])):
-        naList = authorList[i][j].split('.,')   # yield ['name', 'address'] which is <0,1>
+        naList = authorList[i][j].split('.,')   # yield ['name', 'address'] which index is [0,1]
         author = naList[0]
         address = naList[1] if len(naList) > 1 else ''
 
