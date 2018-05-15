@@ -10,3 +10,7 @@ Icon
 .idea/ProfileMatching.iml
 .idea/ProfileMatching.iml
 .idea/ProfileMatching.iml
+.DS_Store
+*.xml
+*.iml
+*.xml
