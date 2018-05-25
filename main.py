@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import math
 import collections
+import nltk
+
 import pandas as pd
 import numpy as np
 import textblob as tb
 
-
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 
 # import data
-data = pd.read_csv('Merge_dataset.csv')
+
+data = pd.read_csv('thammasat.csv')
+stop_words = set(stopwords.words('english'))
 
 # Storage
 dic = collections.defaultdict(dict)     # ['author name'] : { ['Author']: name, ['Address']: address, .... }
@@ -25,9 +29,11 @@ indexKeywordList = data['Index Keywords'].str.split('; ')            # yield lis
 
 
 for i in range(len(data)):
-    document = [docList[i]]
-    authorKeyword = [authorKeywordList[i]] if authorKeywordList[i] is not np.nan else []
-    indexKeyword = [indexKeywordList[i]] if indexKeywordList[i] is not np.nan else []
+    document = docList[i]
+    abstract_tokens = word_tokenize(abstractList[i])
+    abstract = [w for w in abstract_tokens if not w in stop_words]
+    authorKeyword = authorKeywordList[i] if authorKeywordList[i] is not np.nan else []
+    indexKeyword = indexKeywordList[i] if indexKeywordList[i] is not np.nan else []
 
     for j in range(len(authorList[i])):
         authorAffiliation = authorList[i][j].split('.,')   # yield list ['name', 'address'] which index is [0,1]
@@ -35,14 +41,23 @@ for i in range(len(data)):
         affiliation = authorAffiliation[1] if len(authorAffiliation) > 1 else []
 
         if author not in dic:
-            dic[author] = {'Author': author, 'Affiliation': affiliation, 'Document': document, 'AuthorKeyword': authorKeyword, 'IndexKeyword': indexKeyword}
+            document = [document]
+            authorKeyword = authorKeyword
+            indexKeyword = indexKeyword
+            dic[author] = {'Author': author, 'Affiliation': affiliation, 'Document': document,
+                           'Abstract': abstract, 'AuthorKeyword': authorKeyword, 'IndexKeyword': indexKeyword}
 
         else:
             if not dic[author]['Affiliation']:
                 dic[author]['Affiliation'] = affiliation
             dic[author]['Document'].append(document)
-            dic[author]['AuthorKeyword'].append(authorKeyword)
-            dic[author]['IndexKeyword'].append(indexKeyword)
+            if abstract:
+                dic[author]['Abstract'].append(abstract)
+            if authorKeyword:
+                dic[author]['AuthorKeyword'].append(authorKeyword)
+            if indexKeyword:
+                dic[author]['IndexKeyword'].append(indexKeyword)
+
 
 #take input
 query = input("Keywords to find list of people related to: ")
@@ -57,9 +72,10 @@ for k, v in dic.items():
             continue;
 
 
-for author in relatedList:
-    for keyName in author:
-        print(keyName)
+for i in relatedList:
+    for key in i:
+        print(key)
+        print(i[key]['Abstract'])
     # for k in i:
     #     print(i[k]['Author'])
 
