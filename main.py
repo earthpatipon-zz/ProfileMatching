@@ -23,10 +23,10 @@ authorList = data['Authors with affiliations'].str.split('; ')       # yield lis
 authorKeywordList = data['Author Keywords'].str.split('; ')          # yield list ['key1', 'key2', 'key3', ...., 'keyN']
 indexKeywordList = data['Index Keywords'].str.split('; ')            # yield list ['key1', 'key2', 'key3', ...., 'keyN']
 
-for i in range(len(data)-1700):
-    document = docList[i]
-    authorKeyword = authorKeywordList[i] if authorKeywordList[i] is not np.nan else []
-    indexKeyword = indexKeywordList[i] if indexKeywordList[i] is not np.nan else []
+for i in range(len(data)):
+    document = [docList[i]]
+    authorKeyword = [authorKeywordList[i]] if authorKeywordList[i] is not np.nan else []
+    indexKeyword = [indexKeywordList[i]] if indexKeywordList[i] is not np.nan else []
 
     for j in range(len(authorList[i])):
         authorAffiliation = authorList[i][j].split('.,')   # yield list ['name', 'address'] which index is [0,1]
@@ -39,38 +39,26 @@ for i in range(len(data)-1700):
         else:
             if not dic[author]['Affiliation']:
                 dic[author]['Affiliation'] = affiliation
-            dic[author]['Document'] += document
-            dic[author]['AuthorKeyword'] += authorKeyword
-            print("Before")
-            print(indexKeyword)
-            dic[author]['IndexKeyword'] += indexKeyword
-            print("After")
-            print(dic[author]['IndexKeyword'])
-            # print("####################################")
-            # print(dic[author]['Document'])
-            # print(dic[author]['AuthorKeyword'])
-            # print(dic[author]['IndexKeyword'])
-            # print type(dic['Address'])
-            # print type(dic['Keyword'])
-            # print type(dic['Document'])
+            dic[author]['Document'].append(document)
+            dic[author]['AuthorKeyword'].append(authorKeyword)
+            dic[author]['IndexKeyword'].append(indexKeyword)
+
+#take input
+query = input("Keywords to find list of people related to: ")
+query = query.split(',')
+
+for k, v in dic.items():
+    for x in query:
+        if x in v['IndexKeyword']:
+            relatedList.append({k:v})
+            continue;
 
 
-# take input
-# query = raw_input("Keywords to find list of people related to: ")
-# query = input("Keywords to find list of people related to: ")
-# query = query.split(',')
-#
-# for k, v in dic.items():
-#     for x in query:
-#         if x in v['IndexKeyword']:
-#             relatedList.append({k:v})
-#             continue;
-#
-#
-# for i in relatedList:
-#     # print i.values()
-#     for k in i:
-#         print(i[k]['Keyword'])
+for author in relatedList:
+    for keyName in author:
+        print(keyName)
+    # for k in i:
+    #     print(i[k]['Author'])
 
 
 # # td-idf (term frequency and inverse document frequency)
