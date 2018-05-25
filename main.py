@@ -9,7 +9,7 @@ import textblob as tb
 
 
 # import data
-data = pd.read_csv('thammasat.csv')
+data = pd.read_csv('Merge_dataset.csv')
 
 # Storage
 dic = collections.defaultdict(dict)     # ['author name'] : { ['Author']: name, ['Address']: address, .... }
@@ -22,6 +22,7 @@ citedList = data['Cited by']
 authorList = data['Authors with affiliations'].str.split('; ')       # yield list ['name., address'] , ['name., address'], .....
 authorKeywordList = data['Author Keywords'].str.split('; ')          # yield list ['key1', 'key2', 'key3', ...., 'keyN']
 indexKeywordList = data['Index Keywords'].str.split('; ')            # yield list ['key1', 'key2', 'key3', ...., 'keyN']
+
 
 for i in range(len(data)):
     document = [docList[i]]
@@ -46,6 +47,8 @@ for i in range(len(data)):
 #take input
 query = input("Keywords to find list of people related to: ")
 query = query.split(',')
+
+print (query)
 
 for k, v in dic.items():
     for x in query:
