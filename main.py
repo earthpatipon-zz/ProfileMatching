@@ -7,6 +7,7 @@ import numpy as np
 import textblob as tb
 
 
+
 # import data
 data = pd.read_csv('thammasat.csv')
 
@@ -22,18 +23,10 @@ authorList = data['Authors with affiliations'].str.split('; ')       # yield lis
 authorKeywordList = data['Author Keywords'].str.split('; ')          # yield list ['key1', 'key2', 'key3', ...., 'keyN']
 indexKeywordList = data['Index Keywords'].str.split('; ')            # yield list ['key1', 'key2', 'key3', ...., 'keyN']
 
-# for i in range(len(authorKeywordList)):
-#     if math.isnan(authorKeywordList[i]):
-#         print("NaN")
-
-# print(authorKeywordList)
-# print(indexKeywordList)
-for i in range(len(data)):
+for i in range(len(data)-1700):
     document = docList[i]
-    if math.isnan(authorKeywordList[i]):
-        print("hi")
-    authorKeyword = authorKeywordList[i] if authorKeywordList[i] != np.nan else []
-    indexKeyword = indexKeywordList[i] if indexKeywordList[i] != np.nan else []
+    authorKeyword = authorKeywordList[i] if authorKeywordList[i] is not np.nan else []
+    indexKeyword = indexKeywordList[i] if indexKeywordList[i] is not np.nan else []
 
     for j in range(len(authorList[i])):
         authorAffiliation = authorList[i][j].split('.,')   # yield list ['name', 'address'] which index is [0,1]
@@ -48,8 +41,11 @@ for i in range(len(data)):
                 dic[author]['Affiliation'] = affiliation
             dic[author]['Document'] += document
             dic[author]['AuthorKeyword'] += authorKeyword
+            print("Before")
+            print(indexKeyword)
             dic[author]['IndexKeyword'] += indexKeyword
-
+            print("After")
+            print(dic[author]['IndexKeyword'])
             # print("####################################")
             # print(dic[author]['Document'])
             # print(dic[author]['AuthorKeyword'])
@@ -59,8 +55,8 @@ for i in range(len(data)):
             # print type(dic['Document'])
 
 
-# # take input
-# # query = raw_input("Keywords to find list of people related to: ")
+# take input
+# query = raw_input("Keywords to find list of people related to: ")
 # query = input("Keywords to find list of people related to: ")
 # query = query.split(',')
 #
