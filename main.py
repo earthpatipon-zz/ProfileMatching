@@ -12,7 +12,7 @@ from datetime import datetime
 # import data
 start_time = datetime.now()
 
-data = pd.read_csv('thammasat.csv')
+data = pd.read_csv('dataset.csv')
 
 stop_words = set(stopwords.words('english'))
 stop_words.update([',', '.', ':', '(', ')', '%', 'a', 'in', 'to', 's', 'the', 'Â©', '&', 'this', 'that'])
@@ -20,8 +20,9 @@ stop_words.update([',', '.', ':', '(', ')', '%', 'a', 'in', 'to', 's', 'the', 'Â
 # Storage
 dicAuthor = collections.defaultdict(dict)  # ['author name']:{['Author'], ['Affiliation'], ['Document']}
 dicDocument = collections.defaultdict(dict)  # ['document name']:{['Abstract'],['Author']}
+dicAuthorTFIDFList = []    # ['author name']:{['vector']:[list of vectors], ['document']:[list of documents]}
 abstractReducedList = []    # list of cut stop word abstract
-dictAuthorTFIDFList = []    # Vector part
+
 
 # extract information from data
 documentList = data['Title']
@@ -71,8 +72,8 @@ for i in range(len(data)-1500):
 
 # take input
 # query = input("Keywords to find list of people related to: ")
-# query = ["relationship", "system", "temperature", "energies"]
-query = ["mapping", "synthetic", "temperature", "energies"] # for thammasat - 1500
+query = ["relationship", "system", "temperature", "energies"]
+# query = ["mapping", "synthetic", "temperature", "energies"] # for thammasat - 1500
 query = [s.lower() for s in query]
 
 abstractSearchList = []  # list of abstract docs which contain keywords in abstract
@@ -139,22 +140,9 @@ for i in abstractSearchList:
 
 for blob in blobList:
     scores = {word: tfidf(word, blob, blobList) for word in query}
-
-    # print(scores)
-    scoresList = []
-    for i in range(len(query)):
-        if (scores.get(query[j]) == None):
-            scoresList.append(0)
-        else:
-            scoresList.append(scores.get(query[j]))
-            # print(scores.get(query[j]))
-
+    scoresList = [v for k, v in scores.items()]
+    # dicAuthorTFIDFList['']
     vectorList.append(scoresList)
-    print(scoresList)
-
-
-
-print(vectorList)
 
 for i in range(len(vectorList) - 1):
 
