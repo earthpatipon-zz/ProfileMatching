@@ -12,16 +12,15 @@ from datetime import datetime
 # import data
 start_time = datetime.now()
 
-data = pd.read_csv('dataset.csv')
-
+data = pd.read_csv('thammasat.csv')
 stop_words = set(stopwords.words('english'))
 stop_words.update([',', '.', ':', '(', ')', '%', 'a', 'in', 'to', 's', 'the', '©', '&', 'this', 'that'])
 
-# Storage
-dicAuthor = collections.defaultdict(dict)  # ['author name']:{['Author'], ['Affiliation'], ['Document']}
-dicDocument = collections.defaultdict(dict)  # ['document name']:{['Abstract'],['Author']}
-dicAuthorTFIDFList = []    # ['author name']:{['vector']:[list of vectors], ['document']:[list of documents]}
-abstractReducedList = []    # list of cut stop word abstract
+# Dict
+dicAuthor = collections.defaultdict(dict)           # 'author name': {'Author': , 'Affiliation': , 'Document': }
+dicDocument = collections.defaultdict(dict)         # 'document name': {'Abstract': ,'Author': }
+dicKeyword = collections.defaultdict(dict)
+dicAuthorTFIDF = collections.defaultdict(dict)  # 'author name': {'vector': [list of vectors], 'document': [list of documents]}
 
 
 # extract information from data
@@ -30,6 +29,7 @@ abstractList = data['Abstract']
 authorList = data['Authors with affiliations'].str.split('; ')  # yield list ['name., address'] , ['name., address']
 # authorKeywordList = data['Author Keywords'].str.split('; ')       # yield list ['key1', 'key2', 'key3', ...., 'keyN']
 # indexKeywordList = data['Index Keywords'].str.split('; ')         # yield list ['key1', 'key2', 'key3', ...., 'keyN']
+abstractReducedList = []    # list of cut stop word abstract
 
 
 for i in range(len(data)-1500):
@@ -72,44 +72,31 @@ for i in range(len(data)-1500):
 
 # take input
 # query = input("Keywords to find list of people related to: ")
-query = ["relationship", "system", "temperature", "energies"]
-# query = ["mapping", "synthetic", "temperature", "energies"] # for thammasat - 1500
+# query = ["relationship", "system", "temperature", "energies"]
+query = ["mapping", "synthetic", "temperature", "energies"] # for thammasat - 1500
 query = [s.lower() for s in query]
-
 abstractSearchList = []  # list of abstract docs which contain keywords in abstract
-authorSearchList = []    # list of authors who write the contained document
-documentSearchList = []  # list of documents contain keywords in abstract
-temp = []  # keep name of authors including duplicates
-qurytext =""
 
+for word in query:
+    dicKeyword[word] = {'Document': [], 'Author': []}
 
-for i in query: qurytext = qurytext+" "+i
 
 for k, v in dicDocument.items():
     for word in query:
         if word in v['Abstract']:
-            documentSearchList.append(k)
+            dicKeyword[word]['Document'].append(k)
+            temp = []
             for name in v['Author']:
                 temp.append(name)
-            continue
+            dicKeyword[word]['Author'].append(temp)
 
-temp = set(temp)  # remove duplicates
-authorSearchList.append(dicAuthor[i] for i in temp)
+print(dicKeyword)
 
 for i in abstractReducedList:
     for word in query:
         if word in i:
             abstractSearchList.append(i)
             continue
-
-# print(abstractSearchList)
-
-# # check part
-# print(len(documentList))
-# for i in documentList:
-#     for key in i:
-#         print(key)
-#         print(i[key]['Author'])
 
 
 # td-idf (term frequency and inverse document frequency)
@@ -136,20 +123,26 @@ def cos_sim(a, b):
     return dot_product / (norm_a * norm_b)
 
 
-blobList = []
-vectorList = []
+blobList = []       # list of abstract documents
+vectorList = []     # vector of keyword in query
 
 for i in abstractSearchList:
     blobList.append(TextBlob(' '.join(i)))
 
-blobList.append(TextBlob(qurytext))
-
-
 for blob in blobList:
-    scores = {word: tfidf(word, blob, blobList) for word in query}
-    scoresList = [v for k, v in scores.items()]
-    # dicAuthorTFIDFList['']
-    vectorList.append(scoresList)
+    for word in query:
+        score = {word: tfidf(word, blob, blobList) for word in query}
+        scoreVector = [v for k, v in score.items()]
+
+        for i, x in enumerate(dicKeyword[word]['Author']):
+            for author in x:
+                if author not in dicAuthorTFIDF:
+                    dicAuthorTFIDF[author] = {'Document': dicKeyword[word]['Document'][i], 'Vector': [scoreVector]}
+
+        vectorList.append(scoreVector)
+
+
+print(dicAuthorTFIDF)
 
 for i in range(len(vectorList) - 1):
 
