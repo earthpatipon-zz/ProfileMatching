@@ -12,7 +12,7 @@ from datetime import datetime
 # import data
 start_time = datetime.now()
 
-data = pd.read_csv('thammasat.csv')
+data = pd.read_csv('dataset.csv')
 
 stop_words = set(stopwords.words('english'))
 stop_words.update([',', '.', ':', '(', ')', '%', 'a', 'in', 'to', 's', 'the', '©', '&', 'this', 'that'])
@@ -79,6 +79,10 @@ abstractSearchList = []  # list of abstract docs which contain keywords in abstr
 authorSearchList = []    # list of authors who write the contained document
 documentSearchList = []  # list of documents contain keywords in abstract
 temp = []  # keep name of authors including duplicates
+qurytext =""
+
+
+for i in query: qurytext = qurytext+" "+i
 
 for k, v in dicDocument.items():
     for word in query:
@@ -136,6 +140,9 @@ vectorList = []
 
 for i in abstractSearchList:
     blobList.append(TextBlob(' '.join(i)))
+
+blobList.append(TextBlob(qurytext))
+
 
 for blob in blobList:
     scores = {word: tfidf(word, blob, blobList) for word in query}
