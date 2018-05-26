@@ -71,11 +71,12 @@ for i in range(len(data)):
 
 
 #take input
-query = input("Keywords to find list of people related to: ")
-query = query.split(',')
+#query = input("Keywords to find list of people related to: ")
+query = ["relationship","system","temperature","energies"]
 query = [s.lower() for s in query]
 
 documentList = []       # list of documents contain keywords in abstract
+AbstractsearchList = [] # list of abstract contain keywords in abstract
 authorList = []         # list of authors who write the contained document
 temp = []               # keep name of authors including duplicates
 
@@ -87,13 +88,32 @@ for k, v in dicDocument.items():
                 temp.append(name)
             continue
 
+
+
+for i in range(len(abstractList)):
+
+    for word in query:
+        if word in abstractList[i]:
+            #print(abstractList[i])
+            AbstractsearchList.append(abstractList[i])
+
+
 temp = set(temp)    # remove duplicates
 for i in temp:
     authorList.append(dicAuthor[i])
 
-print(documentList)
-for i in authorList:
-    print(i)
+
+#print(AbstractsearchList)
+
+# for i in authorList:
+#     print(i)
+
+
+# print(documentList)
+# for i in authorList:
+#     print(i)
+
+
 
 # # check part
 # print(len(documentList))
@@ -133,7 +153,7 @@ def cos_sim(a, b):
 
 
 blobList = []
-words_set = ["content","process","support","energy"]
+#words_set = ["content","process","support","energy"]
 
 
 vectorList=[]
@@ -141,39 +161,29 @@ vectorList=[]
 # for i in documentList:
 #     blobList.append(TextBlob(i))
 
-for i,a in enumerate(abstractList):
+for i in AbstractsearchList:
 
-
-
-    blobList.append(TextBlob(a))
-
-    if i >= 9:
-
-        blobList.append(TextBlob(str("content process support energy")))
-
-        break
-
-
-
-
+    #print(str(i))
+    blobList.append(TextBlob(str(i)))
 
 
 for i, blob in enumerate(blobList):
 
-    print("Top words in document {}".format(i + 1))
+    #print("Top words in document {}".format(i + 1))
 
 
     scores = {word: tfidf(word, blob, blobList) for word in blob.words}
+    #print(scores)
 
     scoresList =[]
-    for j in range(len(words_set)):
+    for j in range(len(query)):
 
-
-        if(scores.get(words_set[j])==None):
+        if(scores.get(query[j])==None):
 
             scoresList.append(0)
         else:
-            scoresList.append(scores.get(words_set[j]))
+            scoresList.append(scores.get(query[j]))
+            #print(scores.get(query[j]))
 
     vectorList.append(scoresList)
 
