@@ -108,10 +108,10 @@ def tfidf(word, blob, bloblist):
 
 
 blobList = []
-<<<<<<< HEAD
+
 for i in documentList:
     blobList.append(TextBlob(i))
-=======
+
 for i,a in enumerate(abstractList):
 
 
@@ -126,7 +126,6 @@ for i,a in enumerate(abstractList):
 words_set = ["content","process","support","energy"]
 
 
->>>>>>> 275c037b5fec73720d66ef4a4820599c7a44acbb
 
 for i, blob in enumerate(blobList):
 
