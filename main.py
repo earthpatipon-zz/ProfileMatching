@@ -69,14 +69,17 @@ query = input("Keywords to find list of people related to: ")
 query = query.split(',')
 query = [s.lower() for s in query]
 
-documentList = []    # list of documents contain keywords in abstract
+documentList = []       # list of documents contain keywords in abstract
+authorList = []         # list of authors who write the contained document
+
 for k, v in dicDocument.items():
     for x in query:
         if x in v['Abstract']:
             documentList.append({k: v})
+            authorList.append()
             continue
 
-#check part
+# check part
 print(len(documentList))
 for i in documentList:
     for key in i:
@@ -102,7 +105,7 @@ def tfidf(word, blob, bloblist):
 
 
 blobList = []
-for i in abstractList:
+for i in documentList:
     blobList.append(TextBlob(i))
 
 for i, blob in enumerate(blobList):
