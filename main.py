@@ -10,7 +10,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 # import data
-data = pd.read_csv('Thammasat.csv')
+data = pd.read_csv('Merge_dataset.csv')
 
 stop_words = set(stopwords.words('english'))
 stop_words.update([',', '.', ':', '(', ')', '%', 'a', 'in', 'to', 's', 'the', '©', '&', 'this', 'that'])
@@ -74,20 +74,26 @@ query = [s.lower() for s in query]
 
 documentList = []       # list of documents contain keywords in abstract
 authorList = []         # list of authors who write the contained document
+temp = []               # keep name of authors including duplicates
 
 for k, v in dicDocument.items():
-    for x in query:
-        if x in v['Abstract']:
-            documentList.append({k: v})
-            authorList.append()
+    for word in query:
+        if word in v['Abstract']:
+            documentList.append(k)
+            for name in v['Author']:
+                temp.append(name)
             continue
 
-# check part
-print(len(documentList))
-for i in documentList:
-    for key in i:
-        print(key)
-        print(i[key]['Author'])
+temp = set(temp)    # remove duplicates
+for i in temp:
+    authorList.append(dicAuthor[i])
+
+# # check part
+# print(len(documentList))
+# for i in documentList:
+#     for key in i:
+#         print(key)
+#         print(i[key]['Author'])
 
 
 # td-idf (term frequency and inverse document frequency)
