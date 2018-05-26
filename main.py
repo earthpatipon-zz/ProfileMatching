@@ -8,8 +8,11 @@ import numpy as np
 from textblob import TextBlob
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from datetime import datetime
 
 # import data
+start_time = datetime.now()
+
 data = pd.read_csv('dataset.csv')
 
 stop_words = set(stopwords.words('english'))
@@ -170,11 +173,11 @@ for m,i in enumerate(AbstractsearchList):
     blobList.append(TextBlob(str(i)))
 
 
-    if(m==00):
-        blobList.append(TextBlob(qurytext))
+    # if(m==100):
+    #
+    #     break
 
-        break
-
+blobList.append(TextBlob(qurytext))
 
 for i, blob in enumerate(blobList):
 
@@ -221,6 +224,8 @@ for i in range(len(vectorList)-1):
     print((cos_sim(VectorA,VectorB)))
 
 
+end_time = datetime.now()
+print('Duration: {}'.format(end_time - start_time))
 
 
 
