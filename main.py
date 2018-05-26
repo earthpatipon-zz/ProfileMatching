@@ -19,6 +19,9 @@ stop_words.update([',', '.', ':', '(', ')', '%', 'a', 'in', 'to', 's', 'the', 'Â
 dicAuthor = collections.defaultdict(dict)       # ['author name']:{['Author'], ['Affiliation'], ['Document']}
 dicDocument = collections.defaultdict(dict)     # ['document name']:{['Abstract'],['Author']}
 
+#Vector part
+dictAuthorTFIDFList = []
+
 # extract information from data
 docList = data['Title']
 abstractList = data['Abstract']
@@ -105,12 +108,61 @@ def tfidf(word, blob, bloblist):
 
 
 blobList = []
+<<<<<<< HEAD
 for i in documentList:
     blobList.append(TextBlob(i))
+=======
+for i,a in enumerate(abstractList):
+
+
+
+    blobList.append(TextBlob(a))
+
+    if i >= 9:
+        break
+
+
+
+words_set = ["content","process","support","energy"]
+
+
+>>>>>>> 275c037b5fec73720d66ef4a4820599c7a44acbb
 
 for i, blob in enumerate(blobList):
+
     print("Top words in document {}".format(i + 1))
+
+
     scores = {word: tfidf(word, blob, blobList) for word in blob.words}
-    sorted_words = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-    for word, score in sorted_words[:3]:
-        print("\tWord: {}, TF-IDF: {}".format(word, round(score, 5)))
+
+    scoresList =[]
+    for j in range(len(words_set)):
+
+
+        if(scores.get(words_set[j])==None):
+
+            scoresList.append(0)
+        else:
+            scoresList.append(scores.get(words_set[j]))
+
+
+    print (scoresList)
+
+    #Vector = np.array(scoresList)
+    dictAuthorTFIDFList.append([])
+    dictAuthorTFIDFList[0].append(scoresList)
+
+
+
+
+
+
+    #print (scoresList[i])
+
+
+    #print("\tWord: {}, TF-IDF: {}".format(word, round(scores[i], 5)))
+
+
+    # sorted_words = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+    # for word, score in sorted_words[:3]:
+    #    print("\tWord: {}, TF-IDF: {}".format(word, round(score, 5)))
