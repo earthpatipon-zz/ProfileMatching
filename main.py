@@ -20,7 +20,6 @@ stop_words.update([',', '.', ':', '(', ')', '%', 'a', 'in', 'to', 's', 'the', 'Â
 dicAuthor = collections.defaultdict(dict)       # ['author name']:{['Author'], ['Affiliation'], ['Document']}
 dicDocument = collections.defaultdict(dict)     # ['document name']:{['Abstract'],['Author']}
 
-#Vector part
 # Vector part
 dictAuthorTFIDFList = []
 
