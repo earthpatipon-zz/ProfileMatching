@@ -13,12 +13,11 @@ from nltk.tokenize import word_tokenize
 data = pd.read_csv('Thammasat.csv')
 
 stop_words = set(stopwords.words('english'))
-stop_words.update([',', '.', ':', '(', ')', '%'])
+stop_words.update([',', '.', ':', '(', ')', '%', 'a', 'in', 'to', 's', 'the', '©', '&', 'this', 'that'])
 
 # Storage
-dicAuthor = collections.defaultdict(dict)     # ['author name'] : { ['Author']: name, ['Affiliation']: affiliation, .... }
-dicDocument = collections.defaultdict(dict)
-relatedList = []    # list of people related to keywords
+dicAuthor = collections.defaultdict(dict)       # ['author name']:{['Author'], ['Affiliation'], ['Document']}
+dicDocument = collections.defaultdict(dict)     # ['document name']:{['Abstract'],['Author']}
 
 #Vector part
 dictAuthorTFIDFList = []
@@ -35,7 +34,7 @@ authorList = data['Authors with affiliations'].str.split('; ')       # yield lis
 for i in range(len(data)):
     document = docList[i]
     abstract_tokens = word_tokenize(abstractList[i])
-    abstract = [w.lower() for w in abstract_tokens if w not in stop_words]
+    abstractKeyword = [w.lower() for w in abstract_tokens if w.lower() not in stop_words]
     #authorKeyword = authorKeywordList[i] if authorKeywordList[i] is not np.nan else []
     #authorKeyword = [w.lower() for w in authorKeyword]
     #indexKeyword = indexKeywordList[i] if indexKeywordList[i] is not np.nan else []
@@ -47,40 +46,45 @@ for i in range(len(data)):
         affiliation = authorAffiliation[1] if len(authorAffiliation) > 1 else []
 
         if author not in dicAuthor:
-            document = [document]
             #authorKeyword = authorKeyword
             #indexKeyword = indexKeyword
-            dicAuthor[author] = {'Author': author, 'Affiliation': affiliation, 'Document': document, 'Abstract': abstract}
-                           #'AuthorKeyword': authorKeyword, 'IndexKeyword': indexKeyword}
-
+            dicAuthor[author] = {'Author': author, 'Affiliation': affiliation, 'Document': [document]}
+                           #, 'Abstract': abstractKeyword, 'AuthorKeyword': authorKeyword, 'IndexKeyword': indexKeyword}
         else:
             if not dicAuthor[author]['Affiliation']:
                 dicAuthor[author]['Affiliation'] = affiliation
             dicAuthor[author]['Document'].append(document)
-            if abstract:
-                dicAuthor[author]['Abstract'].append(abstract)
+            #dicAuthor[author]['Abstract'].append(abstractKeyword)
             # if authorKeyword:
             #     dicAuthor[author]['AuthorKeyword'].append(authorKeyword)
             # if indexKeyword:
             #     dicAuthor[author]['IndexKeyword'].append(indexKeyword)
 
-# #take input
-# query = input("Keywords to find list of people related to: ")
-# query = query.split(',')
-# query = [s.lower() for s in query]
-#
-# for k, v in dicAuthor.items():
-#     for x in query:
-#         if x in v['Abstract']:
-#             relatedList.append({k: v})
-#             continue
+        if document not in dicDocument:
+            dicDocument[document] = {'Abstract': abstractKeyword, 'Author': [author]}
+        else:
+            dicDocument[document]['Author'].append(author)
 
-# #check part
-# print(len(relatedList))
-# for i in relatedList:
-#     for key in i:
-#         print(key)
-#         #print(i[key]['Abstract'])
+
+
+#take input
+query = input("Keywords to find list of people related to: ")
+query = query.split(',')
+query = [s.lower() for s in query]
+
+documentList = []    # list of documents contain keywords in abstract
+for k, v in dicDocument.items():
+    for x in query:
+        if x in v['Abstract']:
+            documentList.append({k: v})
+            continue
+
+#check part
+print(len(documentList))
+for i in documentList:
+    for key in i:
+        print(key)
+        print(i[key]['Author'])
 
 
 # td-idf (term frequency and inverse document frequency)
