@@ -121,6 +121,9 @@ words_set = ["content","process","support","energy"]
 
 vectorList=[]
 
+# for i in documentList:
+#     blobList.append(TextBlob(i))
+
 for i,a in enumerate(abstractList):
 
 
