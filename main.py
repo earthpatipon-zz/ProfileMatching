@@ -8,7 +8,6 @@ import numpy as np
 from textblob import TextBlob
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from scipy.misc import logsumexp
 
 # import data
 data = pd.read_csv('dataset.csv')
@@ -79,6 +78,10 @@ documentList = []       # list of documents contain keywords in abstract
 AbstractsearchList = [] # list of abstract contain keywords in abstract
 authorList = []         # list of authors who write the contained document
 temp = []               # keep name of authors including duplicates
+qurytext =""
+
+
+for i in query: qurytext = qurytext+" "+i
 
 for k, v in dicDocument.items():
     for word in query:
@@ -161,10 +164,16 @@ vectorList=[]
 # for i in documentList:
 #     blobList.append(TextBlob(i))
 
-for i in AbstractsearchList:
+for m,i in enumerate(AbstractsearchList):
 
     #print(str(i))
     blobList.append(TextBlob(str(i)))
+
+
+    if(m==00):
+        blobList.append(TextBlob(qurytext))
+
+        break
 
 
 for i, blob in enumerate(blobList):
@@ -173,6 +182,7 @@ for i, blob in enumerate(blobList):
 
 
     scores = {word: tfidf(word, blob, blobList) for word in blob.words}
+
     #print(scores)
 
     scoresList =[]
@@ -185,14 +195,16 @@ for i, blob in enumerate(blobList):
             scoresList.append(scores.get(query[j]))
             #print(scores.get(query[j]))
 
+
+
     vectorList.append(scoresList)
 
+    print(scoresList)
 
 
 
 print (vectorList)
 
-    #Vector = np.array(scoresList)
 
 
 
@@ -200,7 +212,6 @@ print (vectorList)
 for i in range(len(vectorList)-1):
 
     VectorA = np.array(vectorList[i])
-
 
     VectorB = np.array(vectorList[len(vectorList)-1])
 
