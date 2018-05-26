@@ -8,9 +8,10 @@ import numpy as np
 from textblob import TextBlob
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from scipy.misc import logsumexp
 
 # import data
-data = pd.read_csv('Merge_dataset.csv')
+data = pd.read_csv('dataset.csv')
 
 stop_words = set(stopwords.words('english'))
 stop_words.update([',', '.', ':', '(', ')', '%', 'a', 'in', 'to', 's', 'the', '©', '&', 'this', 'that'])
@@ -20,25 +21,26 @@ dicAuthor = collections.defaultdict(dict)       # ['author name']:{['Author'], [
 dicDocument = collections.defaultdict(dict)     # ['document name']:{['Abstract'],['Author']}
 
 #Vector part
+# Vector part
 dictAuthorTFIDFList = []
 
 # extract information from data
 docList = data['Title']
 abstractList = data['Abstract']
 citedList = data['Cited by']
-authorList = data['Authors with affiliations'].str.split('; ')       # yield list ['name., address'] , ['name., address'], .....
-#authorKeywordList = data['Author Keywords'].str.split('; ')          # yield list ['key1', 'key2', 'key3', ...., 'keyN']
-#indexKeywordList = data['Index Keywords'].str.split('; ')            # yield list ['key1', 'key2', 'key3', ...., 'keyN']
+authorList = data['Authors with affiliations'].str.split('; ')      # yield list ['name., address'] , ['name., address']
+# authorKeywordList = data['Author Keywords'].str.split('; ')       # yield list ['key1', 'key2', 'key3', ...., 'keyN']
+# indexKeywordList = data['Index Keywords'].str.split('; ')         # yield list ['key1', 'key2', 'key3', ...., 'keyN']
 
 
 for i in range(len(data)):
     document = docList[i]
     abstract_tokens = word_tokenize(abstractList[i])
     abstractKeyword = [w.lower() for w in abstract_tokens if w.lower() not in stop_words]
-    #authorKeyword = authorKeywordList[i] if authorKeywordList[i] is not np.nan else []
-    #authorKeyword = [w.lower() for w in authorKeyword]
-    #indexKeyword = indexKeywordList[i] if indexKeywordList[i] is not np.nan else []
-    #indexKeyword = [w.lower() for w in indexKeyword]
+    # authorKeyword = authorKeywordList[i] if authorKeywordList[i] is not np.nan else []
+    # authorKeyword = [w.lower() for w in authorKeyword]
+    # indexKeyword = indexKeywordList[i] if indexKeywordList[i] is not np.nan else []
+    # indexKeyword = [w.lower() for w in indexKeyword]
 
     for j in range(len(authorList[i])):
         authorAffiliation = authorList[i][j].split('.,')   # yield list ['name', 'address'] which index is [0,1]
@@ -46,15 +48,17 @@ for i in range(len(data)):
         affiliation = authorAffiliation[1] if len(authorAffiliation) > 1 else []
 
         if author not in dicAuthor:
-            #authorKeyword = authorKeyword
-            #indexKeyword = indexKeyword
+            doc = [document]
+            # authorKeyword = authorKeyword
+            # indexKeyword = indexKeyword
             dicAuthor[author] = {'Author': author, 'Affiliation': affiliation, 'Document': [document]}
-                           #, 'Abstract': abstractKeyword, 'AuthorKeyword': authorKeyword, 'IndexKeyword': indexKeyword}
+            # , 'Abstract': abstractKeyword, 'AuthorKeyword': authorKeyword, 'IndexKeyword': indexKeyword}
+
         else:
             if not dicAuthor[author]['Affiliation']:
                 dicAuthor[author]['Affiliation'] = affiliation
             dicAuthor[author]['Document'].append(document)
-            #dicAuthor[author]['Abstract'].append(abstractKeyword)
+            # dicAuthor[author]['Abstract'].append(abstractKeyword)
             # if authorKeyword:
             #     dicAuthor[author]['AuthorKeyword'].append(authorKeyword)
             # if indexKeyword:
@@ -88,13 +92,16 @@ temp = set(temp)    # remove duplicates
 for i in temp:
     authorList.append(dicAuthor[i])
 
+print(documentList)
+for i in authorList:
+    print(i)
+
 # # check part
 # print(len(documentList))
 # for i in documentList:
 #     for key in i:
 #         print(key)
 #         print(i[key]['Author'])
-
 
 # td-idf (term frequency and inverse document frequency)
 def tf(word, blob):
@@ -113,10 +120,25 @@ def tfidf(word, blob, bloblist):
     return tf(word, blob) * idf(word, bloblist)
 
 
-blobList = []
 
-for i in documentList:
-    blobList.append(TextBlob(i))
+def cos_sim(a, b):
+
+	dot_product = np.dot(a, b)
+	norm_a = np.linalg.norm(a)
+	norm_b = np.linalg.norm(b)
+
+
+	return dot_product / (norm_a * norm_b)
+
+
+blobList = []
+words_set = ["content","process","support","energy"]
+
+
+vectorList=[]
+
+# for i in documentList:
+#     blobList.append(TextBlob(i))
 
 for i,a in enumerate(abstractList):
 
@@ -125,11 +147,13 @@ for i,a in enumerate(abstractList):
     blobList.append(TextBlob(a))
 
     if i >= 9:
+
+        blobList.append(TextBlob(str("content process support energy")))
+
         break
 
 
 
-words_set = ["content","process","support","energy"]
 
 
 
@@ -150,16 +174,39 @@ for i, blob in enumerate(blobList):
         else:
             scoresList.append(scores.get(words_set[j]))
 
+    vectorList.append(scoresList)
 
-    print (scoresList)
+
+
+
+print (vectorList)
 
     #Vector = np.array(scoresList)
-    dictAuthorTFIDFList.append([])
-    dictAuthorTFIDFList[0].append(scoresList)
 
 
 
 
+for i in range(len(vectorList)-1):
+
+    VectorA = np.array(vectorList[i])
+
+
+    VectorB = np.array(vectorList[len(vectorList)-1])
+
+    if((np.linalg.norm(VectorA)*np.linalg.norm(VectorB))==0.0):
+            continue
+
+    print((cos_sim(VectorA,VectorB)))
+
+
+
+
+
+# VectorBVectorA = np.array(vectorList[4])
+#
+# VectorB = np.array(vectorList[len(vectorList)-1])
+#
+# print((cos_sim(VectorA,VectorB)))
 
 
     #print (scoresList[i])
