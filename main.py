@@ -24,16 +24,15 @@ dicDocument = collections.defaultdict(dict)     # ['document name']:{['Abstract'
 dictAuthorTFIDFList = []
 
 # extract information from data
-docList = data['Title']
+documentList = data['Title']
 abstractList = data['Abstract']
-citedList = data['Cited by']
 authorList = data['Authors with affiliations'].str.split('; ')      # yield list ['name., address'] , ['name., address']
 # authorKeywordList = data['Author Keywords'].str.split('; ')       # yield list ['key1', 'key2', 'key3', ...., 'keyN']
 # indexKeywordList = data['Index Keywords'].str.split('; ')         # yield list ['key1', 'key2', 'key3', ...., 'keyN']
 
 
 for i in range(len(data)):
-    document = docList[i]
+    document = documentList[i]
     abstract_tokens = word_tokenize(abstractList[i])
     abstractKeyword = [w.lower() for w in abstract_tokens if w.lower() not in stop_words]
     # authorKeyword = authorKeywordList[i] if authorKeywordList[i] is not np.nan else []
@@ -75,45 +74,36 @@ for i in range(len(data)):
 query = ["relationship","system","temperature","energies"]
 query = [s.lower() for s in query]
 
-documentList = []       # list of documents contain keywords in abstract
-AbstractsearchList = [] # list of abstract contain keywords in abstract
-authorList = []         # list of authors who write the contained document
-temp = []               # keep name of authors including duplicates
+documentSearchList = []         # list of documents contain keywords in abstract
+abstractSearchList = []         # list of abstract docs which contain keywords in abstract
+authorSearchList = []           # list of authors who write the contained document
+temp = []                       # keep name of authors including duplicates
 
 for k, v in dicDocument.items():
     for word in query:
         if word in v['Abstract']:
-            documentList.append(k)
+            documentSearchList.append(k)
             for name in v['Author']:
                 temp.append(name)
             continue
 
-
-
-for i in range(len(abstractList)):
-
-    for word in query:
-        if word in abstractList[i]:
-            #print(abstractList[i])
-            AbstractsearchList.append(abstractList[i])
-
-
 temp = set(temp)    # remove duplicates
 for i in temp:
-    authorList.append(dicAuthor[i])
+    authorSearchList.append(dicAuthor[i])
 
+for i in range(len(abstractList)):
+    for word in query:
+        if word in abstractList[i]:
+            abstractSearchList.append([abstractList[i]])
+            continue;
 
-#print(AbstractsearchList)
-
+# print(abstractSearchList)
 # for i in authorList:
 #     print(i)
-
 
 # print(documentList)
 # for i in authorList:
 #     print(i)
-
-
 
 # # check part
 # print(len(documentList))
@@ -121,8 +111,6 @@ for i in temp:
 #     for key in i:
 #         print(key)
 #         print(i[key]['Author'])
-
-
 
 # td-idf (term frequency and inverse document frequency)
 def tf(word, blob):
@@ -143,12 +131,9 @@ def tfidf(word, blob, bloblist):
 
 
 def cos_sim(a, b):
-
 	dot_product = np.dot(a, b)
 	norm_a = np.linalg.norm(a)
 	norm_b = np.linalg.norm(b)
-
-
 	return dot_product / (norm_a * norm_b)
 
 
@@ -161,19 +146,18 @@ vectorList=[]
 # for i in documentList:
 #     blobList.append(TextBlob(i))
 
-for i in AbstractsearchList:
+for i in abstractSearchList:
 
     #print(str(i))
-    blobList.append(TextBlob(str(i)))
+    blobList.append(TextBlob(i[0]))
 
 
 for i, blob in enumerate(blobList):
 
     #print("Top words in document {}".format(i + 1))
 
-
     scores = {word: tfidf(word, blob, blobList) for word in blob.words}
-    #print(scores)
+    print(scores)
 
     scoresList =[]
     for j in range(len(query)):
