@@ -87,6 +87,8 @@ for i in range(len(data)):
 #         #print(i[key]['Abstract'])
 
 
+
+
 # td-idf (term frequency and inverse document frequency)
 def tf(word, blob):
     return blob.words.count(word) / len(blob.words)
