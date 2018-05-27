@@ -4,6 +4,7 @@ import collections
 import math
 import pandas as pd
 import numpy as np
+import operator
 from textblob import TextBlob
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -169,12 +170,18 @@ for k, v in dicAuthorTFIDF.items():
     mean = mean/n
     dicAuthorTFIDF[k]['VectorMean'] = mean
 
+dicRank = collections.defaultdict(dict)
 vectorQuery = np.array([1, 1, 1, 1])
 for k, v in dicAuthorTFIDF.items():
     vectorPerson = v['VectorMean']
-    if (np.linalg.norm(vectorQuery) * np.linalg.norm(vectorPerson)) == 0.0:
+    if (np.linalg.norm(vectorQuery) * np.linalg.norm(vectorPerson)) == 0.0: # if vector is [0, 0, 0, ..] continue
         continue
-    print((cos_sim(vectorQuery, vectorPerson)))
+    dicRank[k] = (cos_sim(vectorQuery, vectorPerson))
+
+rank = dict(sorted(dicRank.items(), key=operator.itemgetter(1), reverse=True)[:5])
+for k, v in rank.items():
+    print(k + "   CosineSim score: " + str(v))
+
 
 
 end_time = datetime.now()
