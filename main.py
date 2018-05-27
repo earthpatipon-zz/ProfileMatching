@@ -32,7 +32,7 @@ authorList = data['Authors with affiliations'].str.split('; ')  # yield list ['n
 
 abstractReducedList = []    # list of cut stop word abstract
 
-for i in range(len(data)-1500):
+for i in range(len(data)):
     document = documentList[i]
     dicDocumentIndex[i] = document
     tokens = word_tokenize(abstractList[i])
@@ -73,8 +73,8 @@ for i in range(len(data)-1500):
 # take input
 # query = input("Keywords to find list of people related to: ")
 # query = ["relationship", "system", "temperature", "energies"]
-# query = ["mapping", "synthetic", "temperature", "energies"] # for thammasat - 1500
-query = ["synthetic"]
+query = ["mapping", "synthetic", "temperature", "energies"] # for thammasat - 1500
+# query = ["synthetic"]
 query = [s.lower() for s in query]
 docSearchList = []       # list of document name which contain keywords in abstract
 abstractSearchList = []  # list of abstract docs which contain keywords in abstract
@@ -152,37 +152,30 @@ for i, blob in enumerate(blobList):
                         dicAuthorTFIDF[author]['Document'].append(docSearchList[i])
                         dicAuthorTFIDF[author]['Vector'].append(scoreVector)
 
-        vectorList.append(scoreVector)
+# iterates to get mean value of vector
+for k, v in dicAuthorTFIDF.items():
+    mean = []
+    temp = []
+    n = 0
+    for word in query:
+        mean.append(0)      # mean = [0, 0, 0, ... ]
+        temp.append(0)
+    for i in v['Vector']:
+        for j in i:
+            temp = [x+y for x, y in zip(temp, i)]
+            n = n + 1
+    mean = [x+y for x, y in zip(mean,temp)]
+    mean = np.array(mean, dtype=np.float)
+    mean = mean/n
+    dicAuthorTFIDF[k]['VectorMean'] = mean
 
-#print(dicKeyword['synthetic'])
-#print(dicAuthorTFIDF)
-
-for i in range(len(vectorList) - 1):
-
-    VectorA = np.array(vectorList[i])
-    VectorB = np.array(vectorList[len(vectorList) - 1])
-
-    if ((np.linalg.norm(VectorA) * np.linalg.norm(VectorB)) == 0.0):
+vectorQuery = np.array([1, 1, 1, 1])
+for k, v in dicAuthorTFIDF.items():
+    vectorPerson = v['VectorMean']
+    if (np.linalg.norm(vectorQuery) * np.linalg.norm(vectorPerson)) == 0.0:
         continue
+    print((cos_sim(vectorQuery, vectorPerson)))
 
-    print((cos_sim(VectorA, VectorB)))
 
 end_time = datetime.now()
 print('Duration: {}'.format(end_time - start_time))
-
-# VectorBVectorA = np.array(vectorList[4])
-#
-# VectorB = np.array(vectorList[len(vectorList)-1])
-#
-# print((cos_sim(VectorA,VectorB)))
-
-
-# print (scoresList[i])
-
-
-# print("\tWord: {}, TF-IDF: {}".format(word, round(scores[i], 5)))
-
-
-# sorted_words = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-# for word, score in sorted_words[:3]:
-#    print("\tWord: {}, TF-IDF: {}".format(word, round(score, 5)))
