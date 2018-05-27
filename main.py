@@ -175,7 +175,7 @@ for k, v in dicAuthorTFIDF.items():
 
 rank = dict(sorted(dicRank.items(), key=operator.itemgetter(1), reverse=True)[:5])
 for k, v in rank.items():
-    print(k + "   CosineSim score: " + str(v))
+    print(k + "." + "   CosineSim score: " + str(v))
     print("Affiliation: " + dicAuthor[k]['Affiliation'])
     print()
 
