@@ -29,8 +29,9 @@ dicRank = collections.defaultdict(dict)             # 'author name': cosine-sim 
 documentList = data['Title']
 abstractList = data['Abstract']
 authorList = data['Authors with affiliations'].str.split('; ')  # yield list ['name., address'] , ['name., address']
-# authorKeywordList = data['Author Keywords'].str.split('; ')       # yield list ['key1', 'key2', 'key3', ...., 'keyN']
-# indexKeywordList = data['Index Keywords'].str.split('; ')         # yield list ['key1', 'key2', 'key3', ...., 'keyN']
+##
+authorKeywordList = data['Author Keywords'].str.split('; ')       # yield list ['key1', 'key2', 'key3', ...., 'keyN']
+indexKeywordList = data['Index Keywords'].str.split('; ')         # yield list ['key1', 'key2', 'key3', ...., 'keyN']
 
 abstractReducedList = []    # list of cut stop word abstract
 
@@ -39,11 +40,15 @@ for i in range(len(data)):
     dicDocumentIndex[i] = document
     tokens = word_tokenize(abstractList[i])
     abstractKeyword = [w.lower() for w in tokens if w.lower() not in stop_words]
-    abstractReducedList.append(abstractKeyword)
-    # authorKeyword = authorKeywordList[i] if authorKeywordList[i] is not np.nan else []
-    # authorKeyword = [w.lower() for w in authorKeyword]
-    # indexKeyword = indexKeywordList[i] if indexKeywordList[i] is not np.nan else []
-    # indexKeyword = [w.lower() for w in indexKeyword]
+    #abstractReducedList.append(abstractKeyword)
+    ##
+    authorKeyword = authorKeywordList[i] if authorKeywordList[i] is not np.nan else []
+    authorKeyword = [w.lower() for w in authorKeyword]
+    indexKeyword = indexKeywordList[i] if indexKeywordList[i] is not np.nan else []
+    indexKeyword = [w.lower() for w in indexKeyword]
+
+    abstractKeyword = abstractKeyword + authorKeyword + indexKeyword
+    abstractReducedList.append(abstractKeyword + authorKeyword + indexKeyword)
 
     for j in range(len(authorList[i])):
         authorAffiliation = authorList[i][j].split('.,')  # yield list ['name', 'address'] which index is [0,1]
