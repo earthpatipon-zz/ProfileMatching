@@ -15,14 +15,15 @@ stop_words = set(stopwords.words('english'))
 stop_words.update([',', '.', ':', '(', ')', '%', 'a', 'in', 'to', 's', 'the', '©', '&', 'this', 'that'])
 
 # import data
-data = pd.read_csv('thammasat.csv')
+data = pd.read_csv('dataset.csv')
 
 # Dict
 dicAuthor = collections.defaultdict(dict)           # 'author name': {'Author': , 'Affiliation': , 'Document': }
-dicDocument = collections.defaultdict(dict)         # 'document name': {'Abstract': ,'Author': }
-dicDocumentIndex = collections.defaultdict(dict)
-dicKeyword = collections.defaultdict(dict)
 dicAuthorTFIDF = collections.defaultdict(dict)      # 'author name': {'vector': [list of vectors], 'document': [list of documents]}
+dicDocument = collections.defaultdict(dict)         # 'document name': {'Abstract': ,'Author': }
+dicDocumentIndex = collections.defaultdict(dict)    # 'index number': document name
+dicKeyword = collections.defaultdict(dict)          # 'keyword': {'Abstract', 'Author'}
+dicRank = collections.defaultdict(dict)             # 'author name': cosine-sim score
 
 # extract information from data
 documentList = data['Title']
@@ -72,13 +73,22 @@ for i in range(len(data)):
             dicDocument[document]['Author'].append(author)
 
 # take input
-# query = input("Keywords to find list of people related to: ")
-# query = ["relationship", "system", "temperature", "energies"]
-query = ["mapping", "synthetic", "temperature", "energies"] # for thammasat - 1500
-# query = ["synthetic"]
+query = input("Keywords to find list of people related to: ")
+query = query.split(', ')
 query = [s.lower() for s in query]
 docSearchList = []       # list of document name which contain keywords in abstract
 abstractSearchList = []  # list of abstract docs which contain keywords in abstract
+
+for i, x in enumerate(abstractReducedList):
+    for word in query:
+        if word in x:
+            docSearchList.append(dicDocumentIndex[i])
+            abstractSearchList.append(x)
+            continue
+
+if(len(abstractSearchList)) == 0:
+    print("No matching results")
+    exit()
 
 for word in query:
     dicKeyword[word] = {'Document': [], 'Author': []}
@@ -91,14 +101,6 @@ for k, v in dicDocument.items():
             for name in v['Author']:
                 temp.append(name)
             dicKeyword[word]['Author'].append(temp)
-
-for i, x in enumerate(abstractReducedList):
-    for word in query:
-        if word in x:
-            docSearchList.append(dicDocumentIndex[i])
-            abstractSearchList.append(x)
-            continue
-
 
 # td-idf (term frequency and inverse document frequency)
 def tf(word, blob):
@@ -125,8 +127,6 @@ def cos_sim(a, b):
 
 
 blobList = []       # list of abstract documents
-vectorList = []     # vector of keyword in query
-
 for i in abstractSearchList:
     blobList.append(TextBlob(' '.join(i)))
 
@@ -134,14 +134,6 @@ for i, blob in enumerate(blobList):
     for word in query:
         score = {word: tfidf(word, blob, blobList) for word in query}
         scoreVector = [v for k, v in score.items()]
-
-        # for j, x in enumerate(dicKeyword[word]['Author']):
-        #     for author in x:
-        #         if author not in dicAuthorTFIDF:
-        #             dicAuthorTFIDF[author] = {'Document': dicKeyword[word]['Document'][i], 'Vector': [scoreVector]}
-        #         else:
-        #             dicAuthorTFIDF[author]['Document'].append(dicKeyword[word]['Document'][i])
-        #             dicAuthorTFIDF[author]['Vector'].append(scoreVector)
 
         for j, x in enumerate(dicKeyword[word]['Author']):
             for author in x:
@@ -170,19 +162,23 @@ for k, v in dicAuthorTFIDF.items():
     mean = mean/n
     dicAuthorTFIDF[k]['VectorMean'] = mean
 
-dicRank = collections.defaultdict(dict)
-vectorQuery = np.array([1, 1, 1, 1])
+vectorQuery = []
+for word in query:
+    vectorQuery.append(1)       # [1, 1, 1, ...]
+vectorQuery = np.array(vectorQuery)
+
 for k, v in dicAuthorTFIDF.items():
     vectorPerson = v['VectorMean']
-    if (np.linalg.norm(vectorQuery) * np.linalg.norm(vectorPerson)) == 0.0: # if vector is [0, 0, 0, ..] continue
+    if (np.linalg.norm(vectorQuery) * np.linalg.norm(vectorPerson)) == 0.0:     # if vector is [0, 0, 0, ..] continue
         continue
     dicRank[k] = (cos_sim(vectorQuery, vectorPerson))
 
 rank = dict(sorted(dicRank.items(), key=operator.itemgetter(1), reverse=True)[:5])
 for k, v in rank.items():
     print(k + "   CosineSim score: " + str(v))
-
-
+    print("Affiliation: " + dicAuthor[k]['Affiliation'])
+    print()
 
 end_time = datetime.now()
+print()
 print('Duration: {}'.format(end_time - start_time))
