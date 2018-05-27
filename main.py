@@ -40,8 +40,6 @@ for i in range(len(data)):
     dicDocumentIndex[i] = document
     tokens = word_tokenize(abstractList[i])
     abstractKeyword = [w.lower() for w in tokens if w.lower() not in stop_words]
-    #abstractReducedList.append(abstractKeyword)
-    ##
     authorKeyword = authorKeywordList[i] if authorKeywordList[i] is not np.nan else []
     authorKeyword = [w.lower() for w in authorKeyword]
     indexKeyword = indexKeywordList[i] if indexKeywordList[i] is not np.nan else []
@@ -57,20 +55,12 @@ for i in range(len(data)):
 
         if author not in dicAuthor:
             doc = [document]
-            # authorKeyword = authorKeyword
-            # indexKeyword = indexKeyword
             dicAuthor[author] = {'Author': author, 'Affiliation': affiliation, 'Document': [document]}
-            # , 'Abstract': abstractKeyword, 'AuthorKeyword': authorKeyword, 'IndexKeyword': indexKeyword}
 
         else:
             if not dicAuthor[author]['Affiliation']:
                 dicAuthor[author]['Affiliation'] = affiliation
             dicAuthor[author]['Document'].append(document)
-            # dicAuthor[author]['Abstract'].append(abstractKeyword)
-            # if authorKeyword:
-            #     dicAuthor[author]['AuthorKeyword'].append(authorKeyword)
-            # if indexKeyword:
-            #     dicAuthor[author]['IndexKeyword'].append(indexKeyword)
 
         if document not in dicDocument:
             dicDocument[document] = {'Abstract': abstractKeyword, 'Author': [author]}
@@ -106,6 +96,7 @@ for k, v in dicDocument.items():
             for name in v['Author']:
                 temp.append(name)
             dicKeyword[word]['Author'].append(temp)
+
 
 # td-idf (term frequency and inverse document frequency)
 def tf(word, blob):
@@ -165,7 +156,7 @@ for k, v in dicAuthorTFIDF.items():
     mean = [x+y for x, y in zip(mean,temp)]
     mean = np.array(mean, dtype=np.float)
     mean = mean/n
-    dicAuthorTFIDF[k]['VectorMean'] = mean
+    dicAuthorTFIDF[k]['VectorMean'] = abs(mean)
 
 vectorQuery = []
 for word in query:
